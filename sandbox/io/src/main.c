@@ -162,10 +162,10 @@ int main(int argc, char *argv [])
      * come up with the labels you want to use, e.g.:
      * 
      *  {
-     *      cloudy_0_25: 0.3,           // 30% prediction confidence that the image is 0-25% cloudy
-     *      cloudy_26_50: 0.5,          // 50% prediction confidence that the image is 26-50% cloudy
-     *      cloudy_51_75: 0.1,          // 10% prediction confidence that the image is 51-75% cloudy 
-     *      couldy_76_100: 0.1          // 30% prediction confidence that the image is 76-100% cloudy
+     *      cloudy_0_25: 0.30,           // 30% prediction confidence that the image is 0-25% cloudy
+     *      cloudy_26_50: 0.50,          // 50% prediction confidence that the image is 26-50% cloudy
+     *      cloudy_51_75: 0.11,          // 11% prediction confidence that the image is 51-75% cloudy 
+     *      couldy_76_100: 0.09          // 9% prediction confidence that the image is 76-100% cloudy
      *  }
      * 
      * for some algorithms the exact cloudiness percentage can be calculated via pixel-by-pixel scan of the segmented image
@@ -187,10 +187,10 @@ int main(int argc, char *argv [])
      * https://github.com/georgeslabreche/tensorflow-opssat-smartcam/blob/dcccc9f756192c43c6d2af2d02249e518b3e0eb4/tensorflow/lite/c/image_classifier.c#L286-L312 
      */
     printf("{"
-        "cloudy_0_25: 0.3, "
-        "cloudy_26_50: 0.5, "
-        "cloudy_51_75: 0.1, "
-        "couldy_76_100: 0.1"
+        "cloudy_0_25: 0.30, "
+        "cloudy_26_50: 0.50, "
+        "cloudy_51_75: 0.11, "
+        "couldy_76_100: 0.09"
     "}");
 
 

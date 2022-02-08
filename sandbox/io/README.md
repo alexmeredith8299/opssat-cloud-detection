@@ -47,6 +47,7 @@ Meaning:
     - 1: write a new image as a new file.
     - 2: write a new image that overwrites the input image file.
     - 3: same as option 2 but backs up the original input image.
+- **args** additional program options specific to the executable binary.
 - **confidence_threshold** is the minimum confidence threshold that a classification must achieve to keep the image (otherwise it will be discarded). 
 
 ## Program inputs

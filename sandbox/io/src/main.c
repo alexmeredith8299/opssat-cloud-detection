@@ -11,7 +11,6 @@ int main(int argc, char *argv [])
 {
     /* get provider host and port from command arguments */
     int8_t argv_index_input = -1;
-    int8_t argv_index_metadata = -1;
     int8_t argv_index_write = -1;
 
     // --------------------------------------------------------------------------
@@ -25,7 +24,6 @@ int main(int argc, char *argv [])
         {
             printf("io_demo [options] ...");
             printf("\n  --input    / -i       the file path of the input image");
-            printf("\n  --metadata / -m       the file path of the metadata csv file");
             printf("\n  --write    / -w       the write mode of the output image (optional)"
                    "\n\t0 - do not write a new image (equivalent to not specifying the --write option)"
                    "\n\t1 - write a new image as a new file"
@@ -42,10 +40,6 @@ int main(int argc, char *argv [])
         if (streq (argv [argn], "--input")
         ||  streq (argv [argn], "-i"))
             argv_index_input = ++argn;
-        else
-        if (streq (argv [argn], "--metadata")
-        ||  streq (argv [argn], "-m"))
-            argv_index_metadata = ++argn;
         else
         if (streq (argv [argn], "--write")
         ||  streq (argv [argn], "-w"))
@@ -77,20 +71,6 @@ int main(int argc, char *argv [])
     else{
         /* printf for documentation purposes only */
         printf("image to process: %s\n", argv[argv_index_input]);
-    }
-
-
-    // --------------------------------------------------------------------------
-    // parse the input image file path
-
-    if(argv_index_metadata == -1)
-    {
-        /* printf for documentation purposes only */
-        printf("no metadata file path specified. Get help: ./io_demo -?\n");
-    }
-    else{
-        /* printf for documentation purposes only */
-        printf("metadata file to process: %s\n", argv[argv_index_metadata]);
     }
 
 
@@ -162,35 +142,38 @@ int main(int argc, char *argv [])
      * come up with the labels you want to use, e.g.:
      * 
      *  {
-     *      cloudy_0_25: 0.30,           // 30% prediction confidence that the image is 0-25% cloudy
-     *      cloudy_26_50: 0.50,          // 50% prediction confidence that the image is 26-50% cloudy
-     *      cloudy_51_75: 0.11,          // 11% prediction confidence that the image is 51-75% cloudy 
-     *      couldy_76_100: 0.09          // 9% prediction confidence that the image is 76-100% cloudy
+     *      cloudy_0_25: 0.30,          // 30% prediction confidence that the image is 0-25% cloudy
+     *      cloudy_26_50: 0.50,         // 50% prediction confidence that the image is 26-50% cloudy
+     *      cloudy_51_75: 0.11,         // 11% prediction confidence that the image is 51-75% cloudy 
+     *      cloudy_76_100: 0.09,        // 9% prediction confidence that the image is 76-100% cloudy
+     *      _metadata_prop1: 10,        // a peroperty prefixed by an underscore means it's metadata, not a label
+     *      _metadata_prop3: 20"        // a peroperty prefixed by an underscore means it's metadata, not a label
+     *      
      *  }
      * 
      * for some algorithms the exact cloudiness percentage can be calculated via pixel-by-pixel scan of the segmented image
-     * consider a case in which we know that an image is 35.49% cloudy, the JSON woud look like this:
+     * consider a case in which we know that an image is 35.492% cloudy, the JSON woud look like this:
      * 
      *  {
-     *      cloudy_0_25: 0
-     *      cloudy_26_50: 1
-     *      cloudy_51_75: 0
-     *      couldy_76_100: 0
+     *      cloudy_0_25: 0,
+     *      cloudy_26_50: 1,
+     *      cloudy_51_75: 0,
+     *      cloudy_76_100: 0,
+     *      _metadata_cloud_coverage: 0.35492
      *  }
      * 
-     * it's OK that we don't downlink the exact percentage value, it can be recalculated on the ground
-     * what matters is that was have classification
-     * in a next iteration of the app we could implement writing the exact cloudiness value in the csv metadata file
      * 
-     * in this example the string is hardcoded but in practice it would have to be built
+     * in the following example the string is hardcoded but in practice it would have to be built
      * example on how a JSON string is built fin the SmartCam's image classifier: 
-     * https://github.com/georgeslabreche/tensorflow-opssat-smartcam/blob/dcccc9f756192c43c6d2af2d02249e518b3e0eb4/tensorflow/lite/c/image_classifier.c#L286-L312 
+     * https://github.com/georgeslabreche/kmeans-image-segmentation/blob/a4bcd2efb695305c8e9a1942b6bd31e87586e632/src/main.cpp#L436-L453
      */
     printf("{"
         "cloudy_0_25: 0.30, "
         "cloudy_26_50: 0.50, "
         "cloudy_51_75: 0.11, "
-        "couldy_76_100: 0.09"
+        "couldy_76_100: 0.09, "
+        "_metadata_prop1: 10, "
+        "_metadata_prop3: 20"
     "}");
 
 

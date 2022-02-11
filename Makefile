@@ -5,7 +5,7 @@ CC_DEV = g++
 CC_ARM = /usr/bin/arm-linux-gnueabihf-g++
 
 # Header includes.
-INCLUDEPATH = 
+INCLUDEPATH = include
 
 # Flags.
 # use Os to optimize for storage space
@@ -33,10 +33,10 @@ else
 endif
 
 all:
-	$(CC) $(CFLAGS) $(INCLUDEPATH) $(HEADERS) $(SOURCES) -o $(BUILDTARGET) $(LIBFLAGS)
+	$(CC) $(CFLAGS) -I$(INCLUDEPATH) $(HEADERS) $(SOURCES) -o $(BUILDTARGET) $(LIBFLAGS)
 
 arm:
-	$(CC_ARM) $(CFLAGS) $(INCLUDEPATH) $(HEADERS) $(SOURCES) -o $(BUILDTARGET_ARM) $(LIBFLAGS)
+	$(CC_ARM) $(CFLAGS) -I$(INCLUDEPATH) $(HEADERS) $(SOURCES) -o $(BUILDTARGET_ARM) $(LIBFLAGS)
 
 clean:
 	rm -f $(BUILDTARGET)

@@ -1,4 +1,4 @@
-TARGET = dev
+cTARGET = dev
 
 # Compiler options.
 CC_DEV = g++
@@ -12,7 +12,7 @@ INCLUDEPATH = include
 CFLAGS = -Wall -static -Os
 
 # Library flags
-LIBFLAGS = 
+LIBFLAGS =
 
 # Source directory and files.
 SOURCEDIR = src

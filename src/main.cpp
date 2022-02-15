@@ -13,6 +13,9 @@
 #define STB_IMAGE_RESIZE_IMPLEMENTATION
 #include "stb_image_resize.h"
 
+// custom headers
+#include "constants.h"
+
 /* define convenience macros */
 #define streq(s1, s2) (!strcmp((s1), (s2)))
 
@@ -159,21 +162,48 @@ int main(int argc, char **argv)
         exit(1);
     }
 
-    printf("loaded image of size w, h, c, %i %i %i", width, height, channels);
+    printf("loaded image of size w, h, c, %i %i %i\n", width, height, channels);
     // size of image in memory
-    int img_memory = size(uint8_t) * w * h * c;
+    int img_memory = sizeof(uint8_t) * width * height * channels;
 
     // TODO: error check, if !img etc
     // printf("image loaded\n");
     // luminosity based implementation - let's loop through every pixel
     // first allocate an output image...
-    uint8_t *luminosity_out = (uint8_t *)malloc(sizeof(*img));
-    printf("%i", sizeof(img));
+    uint8_t *luminosity_out = (uint8_t *)malloc(img_memory);
+    printf("%i\n bytes allocated", img_memory);
     // TODO: implement write mode checking :)
-
     // loop over the image...
+    for (int i = 0; i < width; i++)
+    {
+        for (int j = 0; j < height; j++)
+        {
+            // memory offset from [0]
+            // row major indexing
+            int offset = (channels) * ((width * j) + i);
+            int r_px = img[offset];
+            int g_px = img[offset + 1];
+            int b_px = img[offset + 2];
 
+            if (r_px >= R_THRESH || g_px >= G_THRESH || b_px >= B_THRESH)
+            {
+                luminosity_out[offset] = 255;
+                luminosity_out[offset + 1] = 255;
+                luminosity_out[offset + 2] = 255;
+            }
+            else
+            {
+                luminosity_out[offset] = 0;
+                luminosity_out[offset + 1] = 0;
+                luminosity_out[offset + 2] = 0;
+            }
+        }
+    }
 
+    printf("writing image...\n");
+    stbi_write_png("yee.png", width, height, channels, luminosity_out, width * channels);
+    
     // remember to free the image at the very end
     stbi_image_free(img);
+    stbi_image_free(luminosity_out);
 }

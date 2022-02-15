@@ -19,7 +19,7 @@ SOURCEDIR = src
 HEADERS := $(wildcard $(SOURCEDIR)/*.h)
 SOURCES := $(wildcard $(SOURCEDIR)/*.cpp)
 
-APPNAME = test_helloworld
+APPNAME = opssat_segment
 
 # Target output.
 BUILDTARGET = bin/$(APPNAME).out

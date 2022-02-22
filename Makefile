@@ -5,7 +5,7 @@ CC_DEV = g++
 CC_ARM = /usr/bin/arm-linux-gnueabihf-g++
 
 # Header includes.
-INCLUDEPATH = include
+INCLUDEPATH = include -Iinclude/csv2/include
 
 # Flags.
 # use Os to optimize for storage space
@@ -16,14 +16,21 @@ LIBFLAGS =
 
 # Source directory and files.
 SOURCEDIR = src
-HEADERS := $(wildcard $(SOURCEDIR)/*.h)
-SOURCES := $(wildcard $(SOURCEDIR)/*.cpp)
+LUM_HEADERS := $(wildcard $(SOURCEDIR)/*.h)
+LUM_SOURCES := $(wildcard $(SOURCEDIR)/main.cpp)
 
-APPNAME = opssat_segment
+RF_HEADERS := $(wildcard $(SOURCEDIR)/*.h)
+RF_SOURCES := $(wildcard $(SOURCEDIR)/main_rf.cpp)
+
+LUM_APPNAME = opssat_segment
+RF_APPNAME = opssat_rf_segment
 
 # Target output.
-BUILDTARGET = bin/$(APPNAME).out
-BUILDTARGET_ARM = bin/$(APPNAME)_arm.out
+LUM_BUILDTARGET = bin/$(LUM_APPNAME).out
+LUM_BUILDTARGET_ARM = bin/$(LUM_APPNAME)_arm.out
+
+RF_BUILDTARGET = bin/$(RF_APPNAME).out
+RF_BUILDTARGET_ARM = bin/$(RF_APPNAME)_arm.out
 
 # Target compiler environment.
 ifeq ($(TARGET),arm)
@@ -33,10 +40,13 @@ else
 endif
 
 all:
-	$(CC) $(CFLAGS) -I$(INCLUDEPATH) $(HEADERS) $(SOURCES) -o $(BUILDTARGET) $(LIBFLAGS)
+	$(CC) $(CFLAGS) -I$(INCLUDEPATH) $(LUM_HEADERS) $(LUM_SOURCES) -o $(LUM_BUILDTARGET) $(LIBFLAGS)
+	$(CC) $(CFLAGS) -I$(INCLUDEPATH) $(RF_HEADERS) $(RF_SOURCES) -o $(RF_BUILDTARGET) $(LIBFLAGS)
 
 arm:
-	$(CC_ARM) $(CFLAGS) -I$(INCLUDEPATH) $(HEADERS) $(SOURCES) -o $(BUILDTARGET_ARM) $(LIBFLAGS)
+	$(CC_ARM) $(CFLAGS) -I$(INCLUDEPATH) $(LUM_HEADERS) $(LUM_SOURCES) -o $(LUM_BUILDTARGET_ARM) $(LIBFLAGS)
+	$(CC_ARM) $(CFLAGS) -I$(INCLUDEPATH) $(RF_HEADERS) $(RF_SOURCES) -o $(RF_BUILDTARGET) $(LIBFLAGS)
 
 clean:
-	rm -f $(BUILDTARGET)
+	rm -f $(LUM_BUILDTARGET)
+	rm -f $(RF_BUILDTARGET)

@@ -16,6 +16,9 @@
 // custom headers
 #include "constants.h"
 
+//include csv2 for random forest
+#include <csv2/reader.hpp>
+
 /* define convenience macros */
 #define streq(s1, s2) (!strcmp((s1), (s2)))
 
@@ -184,6 +187,7 @@ int main(int argc, char **argv)
             int r_px = img[offset];
             int g_px = img[offset + 1];
             int b_px = img[offset + 2];
+            //std::cout<<"R, G, B="<<r_px<<", "<<g_px<<", "<<b_px<<"\n";
 
             if (r_px >= R_THRESH || g_px >= G_THRESH || b_px >= B_THRESH)
             {
@@ -202,7 +206,7 @@ int main(int argc, char **argv)
 
     printf("writing image...\n");
     stbi_write_png("yee.png", width, height, channels, luminosity_out, width * channels);
-    
+
     // remember to free the image at the very end
     stbi_image_free(img);
     stbi_image_free(luminosity_out);

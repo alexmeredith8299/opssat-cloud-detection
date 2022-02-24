@@ -9,7 +9,7 @@ INCLUDEPATH = include -Iinclude/csv2/include
 
 # Flags.
 # use Os to optimize for storage space
-CFLAGS = -Wall -static -Os
+CFLAGS = -Wall  -Os
 
 # Library flags
 LIBFLAGS =
@@ -40,8 +40,8 @@ else
 endif
 
 all:
-	$(CC) $(CFLAGS) -I$(INCLUDEPATH) $(LUM_HEADERS) $(LUM_SOURCES) -o $(LUM_BUILDTARGET) $(LIBFLAGS)
-	$(CC) $(CFLAGS) -I$(INCLUDEPATH) $(RF_HEADERS) $(RF_SOURCES) -o $(RF_BUILDTARGET) $(LIBFLAGS)
+	$(CC) $(CFLAGS) -I$(INCLUDEPATH) $(LUM_HEADERS) $(LUM_SOURCES) -o $(LUM_BUILDTARGET) $(LIBFLAGS) -std=c++11
+	$(CC) $(CFLAGS) -I$(INCLUDEPATH) $(RF_HEADERS) $(RF_SOURCES) -o $(RF_BUILDTARGET) $(LIBFLAGS) -std=c++11
 
 arm:
 	$(CC_ARM) $(CFLAGS) -I$(INCLUDEPATH) $(LUM_HEADERS) $(LUM_SOURCES) -o $(LUM_BUILDTARGET_ARM) $(LIBFLAGS)

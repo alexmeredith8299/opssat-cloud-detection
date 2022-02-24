@@ -243,13 +243,15 @@ void write_img_to_csv(std::string img_path, std::string csv_path)
     headers.push_back("CLOUD");
     rows.push_back(headers);
 
-    //RBF: used so our csv isn't obsecenly giant
-    int i_start = width-200;
-    int j_start = height-200;
+    //Placeholder: center crop to 256 x 256
+    int i_start = std::max(0, (int)(ceil(width/2)-128));
+    int j_start = std::max(0, (int)(ceil(height/2)-128));
+    int i_end = std::min(width, (int)(ceil(width/2)+128));
+    int j_end = std::min(height, (int)(ceil(height/2)+128));
 
-    for (int i = i_start; i < width; i++)
+    for (int i = i_start; i < i_end; i++)
     {
-        for (int j = j_start; j < height; j++)
+        for (int j = j_start; j < j_end; j++)
         {
             // memory offset from [0]
             // row major indexing
@@ -400,11 +402,13 @@ void write_csv_to_img(std::string csv_path, std::string img_path)
       cell.read_value(val);
       std::cout<<val<<"\n";
     }
-    int height = 200;
-    int width = 200;
+    //int height = 200;
+    //int width = 200;
     int channels = 3; //R, G, B
 
-    int img_memory = sizeof(uint8_t) * width * height * channels;
+    size_t nrows = csv.rows();
+    std::cout<<"nrows="<<nrows<<"\n";
+    int img_memory = sizeof(uint8_t) * nrows * channels;
     // TODO: error check, if !img etc
     // printf("image loaded\n");
     // luminosity based implementation - let's loop through every pixel
@@ -413,8 +417,6 @@ void write_csv_to_img(std::string csv_path, std::string img_path)
     printf("%i\n bytes allocated", img_memory);
 
     int csv_row= 0;
-    size_t nrows = csv.rows();
-    std::cout<<"nrows="<<nrows;
     for (const auto row: csv) {
       for (const auto cell: row) {
         //Read cell value
@@ -427,7 +429,7 @@ void write_csv_to_img(std::string csv_path, std::string img_path)
           //int b_px = img[offset + 2];
 
           int idx = channels*(csv_row-2);
-          std::cout<<"idx, val, ht="<<idx<<", "<<idx<<", "<<csv_row<<"\n";
+          //std::cout<<"idx, val, ht="<<idx<<", "<<idx<<", "<<csv_row<<"\n";
 
           if (val == "1")
           {
@@ -444,7 +446,9 @@ void write_csv_to_img(std::string csv_path, std::string img_path)
       }
       csv_row++;
     }
-    std::cout<<"w, h = "<<width<<","<<height;
+    //Assume square.
+    int width = (int)(pow(nrows, 0.5));
+    int height = (int)(pow(nrows, 0.5));
     printf("writing image...\n");
     const char* img_outpath = img_path.c_str();
     stbi_write_png(img_outpath, width, height, channels, cloud_mask_out, width * channels);
@@ -464,9 +468,6 @@ int main(int argc, char **argv)
 
     parse_options(argc, argv, &input_path, &mode, &output_path);
 
-    std::cout<<"here\n";
-    std::cout<<"mode"<<mode<<"\n";
-
     if(input_path.length() != 0) {
       if(mode == 1) {
         if(output_path.length() == 0) {
@@ -476,7 +477,6 @@ int main(int argc, char **argv)
           write_img_to_csv(input_path, output_path);
         }
       } else if(mode == 2) {
-        std::cout<<"here\n";
         if(output_path.length() == 0) {
           write_csv_to_img(input_path, "out.png");
         }

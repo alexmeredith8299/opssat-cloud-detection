@@ -1,4 +1,21 @@
-cmake_minimum_required(VERSION 2.0)
+cmake_minimum_required(VERSION 3.10)
+
+
+set(CMAKE_SYSTEM_NAME Linux)
+
+set(CMAKE_SYSTEM_PROCESSOR arm)
+
+
+SET(CMAKE_C_COMPILER "/usr/bin/arm-linux-gnueabihf-gcc")
+
+SET(CMAKE_CXX_COMPILER "/usr/bin/arm-linux-gnueabihf-g++")
+
+
+message(STATUS "using ${CMAKE_CXX_COMPILER}")
+
+
+set(CMAKE_VERBOSE_MAKEFILE ON)
+
 
 # set the project name
 project(opssat-segment)
@@ -15,9 +32,9 @@ if(NOT TENSORFLOW_SOURCE_DIR)
     "${CMAKE_CURRENT_LIST_DIR}/../../../../" ABSOLUTE)
 endif()
 
-add_subdirectory(
-  "${TENSORFLOW_SOURCE_DIR}/tensorflow/lite"
-  "${CMAKE_CURRENT_BINARY_DIR}/tensorflow-lite" EXCLUDE_FROM_ALL)
+#add_subdirectory(
+  #"${TENSORFLOW_SOURCE_DIR}/tensorflow/lite"
+  #"${CMAKE_CURRENT_BINARY_DIR}/tensorflow-lite" EXCLUDE_FROM_ALL)
 
 #ranger
 set(RANGER_SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/include/ranger")
@@ -41,5 +58,5 @@ add_executable(opssat-segment.out src/main.cpp)
 add_executable(opssat-rf-segment.out src/main_rf.cpp)
 
 target_link_libraries(opssat-segment.out
-  tensorflow-lite
+  #tensorflow-lite
 )

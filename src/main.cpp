@@ -5,19 +5,25 @@
 #include <errno.h>  /* standard linux error codes: https://www.thegeekstuff.com/2010/10/linux-error-codes/ */
 #include <stdint.h> /* for portability when dealing with integer data types */
 
+// tensorflow
+#include "tensorflow/lite/interpreter.h"
+#include "tensorflow/lite/kernels/register.h"
+#include "tensorflow/lite/model.h"
+#include "tensorflow/lite/optional_debug_tools.h"
+
 // relevant STB headers
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
-#define STB_IMAGE_RESIZE_IMPLEMENTATION
-#include "stb_image_resize.h"
+// #define STB_IMAGE_RESIZE_IMPLEMENTATION
+// #include "stb_image_resize.h"
 
 // custom headers
 #include "constants.h"
 
 //include csv2 for random forest
-#include <csv2/reader.hpp>
+// #include <csv2/reader.hpp>
 
 /* define convenience macros */
 #define streq(s1, s2) (!strcmp((s1), (s2)))
@@ -189,14 +195,17 @@ int main(int argc, char **argv)
             int b_px = img[offset + 2];
             //std::cout<<"R, G, B="<<r_px<<", "<<g_px<<", "<<b_px<<"\n";
 
+            // if the pixel is greater than all the thresholds... [0-255]
             if (r_px >= R_THRESH || g_px >= G_THRESH || b_px >= B_THRESH)
             {
+                // ...assign it white
                 luminosity_out[offset] = 255;
                 luminosity_out[offset + 1] = 255;
                 luminosity_out[offset + 2] = 255;
             }
             else
             {
+                // ...otherwise assign it black
                 luminosity_out[offset] = 0;
                 luminosity_out[offset + 1] = 0;
                 luminosity_out[offset + 2] = 0;
@@ -205,9 +214,11 @@ int main(int argc, char **argv)
     }
 
     printf("writing image...\n");
-    stbi_write_png("yee.png", width, height, channels, luminosity_out, width * channels);
+    stbi_write_png("test_out.png", width, height, channels, luminosity_out, width * channels);
 
     // remember to free the image at the very end
     stbi_image_free(img);
     stbi_image_free(luminosity_out);
+
+    return 0;
 }

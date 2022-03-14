@@ -261,8 +261,8 @@ void write_img_to_csv(std::string img_path, std::string csv_path)
             int r_22 = img[offset];
             int g_22 = img[offset + 1];
             int b_22 = img[offset + 2];
-            std::cout<<"R, G, B="<<r_22<<", "<<g_22<<", "<<b_22<<"\n";
-            std::cout<<"Offset "<<offset<<"\n";
+            //std::cout<<"R, G, B="<<r_22<<", "<<g_22<<", "<<b_22<<"\n";
+            //std::cout<<"Offset "<<offset<<"\n";
 
             int jm = j-1;
             int jp = j+1;
@@ -400,7 +400,7 @@ void write_csv_to_img(std::string csv_path, std::string img_path)
     for( const auto cell: header) {
       std::string val;
       cell.read_value(val);
-      std::cout<<val<<"\n";
+      //std::cout<<val<<"\n";
     }
     //int height = 200;
     //int width = 200;

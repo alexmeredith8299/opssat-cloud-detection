@@ -1,9 +1,9 @@
 [submodule "include/csv2"]
 	path = include/csv2
 	url = https://github.com/georgeslabreche/csv2
-[submodule "include/ranger"]
-	path = include/ranger
-	url = https://github.com/georgeslabreche/ranger
 [submodule "tensorflow"]
 	path = tensorflow
 	url = https://github.com/tensorflow/tensorflow
+[submodule "include/ranger"]
+	path = include/ranger
+	url = git@github.com:alexmeredith8299/ranger.git

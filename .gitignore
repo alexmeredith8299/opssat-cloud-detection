@@ -33,9 +33,20 @@
 
 *.cmake
 
+*checkpoint
+*checkpoint.py
+*checkpoint.ipynb
+
+*.zip
+*.pyc
+
+/release/*
 /bin
 /tensorflow-lite
 /tmp
+/src/eigen-populate*
+/src/abseil-cpp-populate*
+
 CMakeLists.txt.user
 CMakeCache.txt
 CMakeFiles

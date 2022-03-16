@@ -13,7 +13,7 @@ Target node size:                  1
 Variable importance mode:          0
 Memory mode:                       0
 Seed:                              0
-Number of threads:                 8
+Number of threads:                 4
 
 Saved predictions to file ranger_out.prediction.
 Finished Ranger.

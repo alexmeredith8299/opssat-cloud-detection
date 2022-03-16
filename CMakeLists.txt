@@ -1,12 +1,12 @@
-cmake_minimum_required(VERSION 3.16)
+#cmake_minimum_required(VERSION 3.16)
 
-#set(CMAKE_SYSTEM_NAME Linux)
+set(CMAKE_SYSTEM_NAME Linux)
 
-#set(CMAKE_SYSTEM_PROCESSOR armv7)
+set(CMAKE_SYSTEM_PROCESSOR armv7)
 
-#SET(CMAKE_C_COMPILER "/usr/bin/arm-linux-gnueabihf-gcc-7")
+SET(CMAKE_C_COMPILER "/usr/bin/arm-linux-gnueabihf-gcc-7")
 
-#SET(CMAKE_CXX_COMPILER "/usr/bin/arm-linux-gnueabihf-g++-7")
+SET(CMAKE_CXX_COMPILER "/usr/bin/arm-linux-gnueabihf-g++-7")
 
 message(STATUS "using ${CMAKE_CXX_COMPILER}")
 
@@ -59,7 +59,7 @@ include_directories(
   include/csv2/include)
 
 
-#add_compile_options(-Wall -static -O0 -march=armv7-a -mfpu=neon-vfpv4 -funsafe-math-optimizations)
+add_compile_options(-Wall -static -O0 -march=armv7-a -mfpu=neon-vfpv4 -funsafe-math-optimizations)
 
 # add the executable
 #add_executable(opssat-segment.out src/main.cpp)

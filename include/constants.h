@@ -4,3 +4,6 @@
 
 #define EXPDIR "/home/root/exp185"
 #define SMARTCAMDIR "/home/root/exp1000"
+
+#define MODELPATH "model.tflite"
+#define MODELPATCH 256

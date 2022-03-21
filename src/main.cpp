@@ -101,8 +101,10 @@ int parse_options(int argc, char **argv, string *img_write_path, int *img_write_
     }
     else
     {
-        /* printf for documentation purposes only */
+/* printf for documentation purposes only */
+#ifdef DEBUG
         printf("image to process: %s\n", argv[argv_index_input]);
+#endif
         *img_write_path = string(argv[argv_index_input]);
     }
 
@@ -120,8 +122,10 @@ int parse_options(int argc, char **argv, string *img_write_path, int *img_write_
 
         // set to write mode
         *img_write_mode = write_mode;
-        // printf("write mode %i\n", write_mode);
-        /* prompt which option was selected */
+// printf("write mode %i\n", write_mode);
+/* prompt which option was selected */
+#ifdef DEBUG
+
         switch (write_mode)
         {
         case 0:
@@ -151,6 +155,7 @@ int parse_options(int argc, char **argv, string *img_write_path, int *img_write_
             /* 22 	EINVAL 	Invalid argument */
             return EINVAL;
         }
+#endif
     }
 
     return 0;
@@ -192,16 +197,14 @@ int main(int argc, char **argv)
     // size of image in memory
     const int img_memory = sizeof(uint8_t) * width * height * channels;
 
-    // TODO: error check, if !img etc
-    // printf("image loaded\n");
     // luminosity based implementation - let's loop through every pixel
     // first allocate an output image...
     uint8_t *out_buffer = (uint8_t *)malloc(img_memory);
 
-    // TODO: calculate cloud cover using luminosity for
-
-    printf("%i\n bytes allocated", img_memory);
-    // TODO: implement write mode checking :)
+    // TODO: calculate cloud cover using luminosity for return
+#ifdef DEBUG
+    printf("%i bytes allocated\n", img_memory);
+#endif
     // loop over the image...
     for (int i = 0; i < width; i++)
     {
@@ -237,7 +240,8 @@ int main(int argc, char **argv)
     printf("writing image...\n");
 #endif
     // todo: make it build a filename, lol
-    stbi_write_png("test_out.png", width, height, channels, out_buffer, width * channels);
+    stbi_write_png(build_image_output_filename(write_mode, img_path, ".png", "lum").c_str(), width, height, channels, out_buffer, width * channels);
+    stbi_image_free(out_buffer);
 
     // TFLITE STUFF here
     // Load model
@@ -256,9 +260,11 @@ int main(int argc, char **argv)
 
     // Allocate tensor buffers.
     MINIMAL_CHECK(interpreter->AllocateTensors() == kTfLiteOk);
+
+#ifdef DEBUG
     printf("=== Pre-invoke Interpreter State ===\n");
     tflite::PrintInterpreterState(interpreter.get());
-
+#endif
     // Fill input buffers
     // Note: The buffer of the input tensor with index `i` of type T can
     // be accessed with `T* input = interpreter->typed_input_tensor<T>(i);`
@@ -279,19 +285,20 @@ int main(int argc, char **argv)
     {
         for (int h = 0; h < pheight_max; h++)
         {
+            // first allocate the tensor input buffer
             // j = height
             // i = width
-            printf("write_mode %i\n", write_mode);
-
             for (int j = h * MODELPATCH; j < (h + 1) * MODELPATCH; j++)
             {
                 for (int i = w * MODELPATCH; i < (w + 1) * MODELPATCH; i++)
                 {
                     for (int k = 0; k < 3; k++)
                     {
+                        // printf("j %i\n", j);
                         // allocate the image
-                        int offset = ((channels) * ((width * j) + i)) + k;
-                        input[((channels) * ((MODELPATCH * j) + i)) + k] = img[offset];
+                        int offset = (((channels) * ((width * j) + i)) + k);
+                        // move i, j back into nominal coordinates
+                        input[((channels) * ((MODELPATCH * (j - h * MODELPATCH)) + (i - w * MODELPATCH))) + k] = img[offset];
                     }
                 }
             }
@@ -301,8 +308,11 @@ int main(int argc, char **argv)
             // Run inference
 #endif
             MINIMAL_CHECK(interpreter->Invoke() == kTfLiteOk);
+
+#ifdef DEBUG
             printf("\n\n=== Post-invoke Interpreter State ===\n");
             tflite::PrintInterpreterState(interpreter.get());
+#endif
 
             // Read output buffers
             // Note: The buffer of the output tensor with index `i` of type T can
@@ -312,7 +322,7 @@ int main(int argc, char **argv)
 
             // first build the extension name...
 
-            string patch = std::to_string(w) + std::to_string(h);
+            string patch = "ml_" + std::to_string(w) + std::to_string(h);
             string ml_out_filename = build_image_output_filename(write_mode, img_path, ".png", patch);
 
 #ifdef DEBUG
@@ -328,7 +338,16 @@ int main(int argc, char **argv)
 
     // remember to free the image at the very end
     stbi_image_free(img);
-    stbi_image_free(out_buffer);
+
+    // print output for smartcam
+    printf("{"
+           "cloudy_0_25: 0.30, "
+           "cloudy_26_50: 0.50, "
+           "cloudy_51_75: 0.11, "
+           "cloudy_76_100: 0.09, "
+           "_metadata_prop1: 10, "
+           "_metadata_prop3: 20"
+           "}");
 
     return 0;
 }

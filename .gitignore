@@ -30,6 +30,7 @@
 *.exe
 *.out
 *.app
+*.tflite
 
 *.cmake
 
@@ -40,7 +41,9 @@
 *.zip
 *.pyc
 
-/release/*
+/em_test
+/.vscode
+/release
 /bin
 /tensorflow-lite
 /tmp

@@ -34,7 +34,6 @@ using namespace csv2;
 
 // custom headers
 #include "constants.h"
-//#include "unet.h"
 #include "helper.h"
 
 /* define convenience macros */
@@ -167,6 +166,28 @@ int parse_options(int argc, char **argv, string *img_write_path, int *img_write_
     }
 
     return 0;
+}
+
+void print_smartcam_output(float cloud_coverage)
+{
+    // print output for smartcam
+    // code stolen shamelessly from Georges
+
+    /* mark which 100% confidence which label to apply to the image */
+    uint8_t cloudy_0_25 = cloud_coverage >= 0 && cloud_coverage <= 0.25 ? 1 : 0;
+    uint8_t cloudy_26_50 = cloud_coverage > 0.25 && cloud_coverage <= 0.50 ? 1 : 0;
+    uint8_t cloudy_51_75 = cloud_coverage > 0.50 && cloud_coverage <= 0.75 ? 1 : 0;
+    uint8_t cloudy_76_100 = cloud_coverage > 0.75 ? 1 : 0;
+
+    /* create classification result json object */
+    printf("{");
+    printf("\"cloudy_0_25\": %d, ", cloudy_0_25);
+    printf("\"cloudy_26_50\": %d, ", cloudy_26_50);
+    printf("\"cloudy_51_75\": %d, ", cloudy_51_75);
+    printf("\"cloudy_76_100\": %d, ", cloudy_76_100);
+    printf("\"features\": 0, ");
+    printf("\"_cloud_coverage\": %f", cloud_coverage); /* prefixed by an underscore means it's metadata, not a label */
+    printf("}");
 }
 
 void log_vitals()
@@ -515,6 +536,7 @@ int main(int argc, char **argv)
     printf("%i bytes allocated\n", img_memory);
 #endif
     // loop over the image...
+    int cloudy_px = 0;
     for (int i = 0; i < width; i++)
     {
         for (int j = 0; j < height; j++)
@@ -534,6 +556,7 @@ int main(int argc, char **argv)
                 out_buffer[offset] = 255;
                 out_buffer[offset + 1] = 255;
                 out_buffer[offset + 2] = 255;
+                cloudy_px++;
             }
             else
             {
@@ -544,6 +567,8 @@ int main(int argc, char **argv)
             }
         }
     }
+
+    float cloud_coverage = cloudy_px / ((double)width * (double)height);
 
 #ifdef DEBUG
     printf("writing image...\n");
@@ -660,15 +685,6 @@ int main(int argc, char **argv)
     // remember to free the image at the very end
     stbi_image_free(img);
 
-    // print output for smartcam
-    printf("{"
-           "cloudy_0_25: 0.30, "
-           "cloudy_26_50: 0.50, "
-           "cloudy_51_75: 0.11, "
-           "cloudy_76_100: 0.09, "
-           "_metadata_prop1: 10, "
-           "_metadata_prop3: 20"
-           "}");
-
+    print_smartcam_output(cloud_coverage);
     return 0;
 }

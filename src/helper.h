@@ -10,6 +10,7 @@ string build_image_output_filename(const int write_mode, string inimg_filename, 
     switch (write_mode)
     {
     case 1: /* write a new image as a new file */
+    {
         /* create new file name for the output image file */
         string outimg_filename = inimg_filename.substr(0, inimg_filename.find_last_of(".")) ;
         outimg_filename.append(".segmented.");
@@ -17,10 +18,12 @@ string build_image_output_filename(const int write_mode, string inimg_filename, 
         outimg_filename.append(image_file_ext);
         return outimg_filename;
         break;
+    }
 
     case 2: /* write a new image that overwrites the input image file */
 
         /* use existing input image file name as the the output image file name */
+        //string outimg_filename = "";
         return inimg_filename;
         break;
     // TODO: implement this with strings (god bless C++)

@@ -6,14 +6,14 @@ Predicting ..
 Tree type:                         Classification
 Dependent variable name:           CLOUD
 Number of trees:                   10
-Sample size:                       65536
+Sample size:                       357962
 Number of independent variables:   27
 Mtry:                              5
 Target node size:                  1
 Variable importance mode:          0
 Memory mode:                       0
 Seed:                              0
-Number of threads:                 4
+Number of threads:                 8
 
 Saved predictions to file ranger_out.prediction.
 Finished Ranger.

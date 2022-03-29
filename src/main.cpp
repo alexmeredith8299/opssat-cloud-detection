@@ -1,4 +1,4 @@
-#define DEBUG
+// #define DEBUG
 
 #include <stdio.h>
 #include <iostream>
@@ -18,15 +18,15 @@
 #include "tensorflow/lite/kernels/register.h"
 #include "tensorflow/lite/model.h"
 
-#include <csv2/reader.hpp> // include csv2 for random forest
-#include <csv2/writer.hpp>
+// #include <csv2/reader.hpp> // include csv2 for random forest
+// #include <csv2/writer.hpp>
 #include <vector>
 #include <iterator>
 
-#define INPUT_CSV_FILENAME  "ranger_input.csv"
-#define OUTPUT_CSV_FILENAME  "ranger_output.csv"
+#define INPUT_CSV_FILENAME "ranger_input.csv"
+#define OUTPUT_CSV_FILENAME "ranger_output.csv"
 
-using namespace csv2;
+// using namespace csv2;
 
 #ifdef DEBUG
 #include "tensorflow/lite/optional_debug_tools.h"
@@ -35,6 +35,8 @@ using namespace csv2;
 // custom headers
 #include "constants.h"
 #include "helper.h"
+
+// TODO: add a labels.txt which is the classification labels
 
 /* define convenience macros */
 #define streq(s1, s2) (!strcmp((s1), (s2)))
@@ -129,40 +131,6 @@ int parse_options(int argc, char **argv, string *img_write_path, int *img_write_
 
         // set to write mode
         *img_write_mode = write_mode;
-// printf("write mode %i\n", write_mode);
-/* prompt which option was selected */
-#ifdef DEBUG
-
-        switch (write_mode)
-        {
-        case 0:
-            /* printf for documentation purposes only */
-            printf("don't write a new image (equivalent to not specifying the --write option)\n");
-            break;
-
-        case 1:
-            /* printf for documentation purposes only */
-            printf("write a new image as a new file\n");
-            break;
-
-        case 2:
-            /* printf for documentation purposes only */
-            printf("write a new image that overwrites the input image file\n");
-            break;
-
-        case 3:
-            /* printf for documentation purposes only */
-            printf("write a new image that overwrites the input image file but backs up the original input image\n");
-            break;
-
-        default:
-            /* print error message */
-            printf("invalid write mode option. Get help: ./io_demo -?\n");
-            /* program error exit code */
-            /* 22 	EINVAL 	Invalid argument */
-            return EINVAL;
-        }
-#endif
     }
 
     return 0;
@@ -181,11 +149,10 @@ void print_smartcam_output(float cloud_coverage)
 
     /* create classification result json object */
     printf("{");
-    printf("\"cloudy_0_25\": %d, ", cloudy_0_25);
-    printf("\"cloudy_26_50\": %d, ", cloudy_26_50);
-    printf("\"cloudy_51_75\": %d, ", cloudy_51_75);
-    printf("\"cloudy_76_100\": %d, ", cloudy_76_100);
-    printf("\"features\": 0, ");
+    printf("\"mit_cloudy_0_25\": %d, ", cloudy_0_25);
+    printf("\"mit_cloudy_26_50\": %d, ", cloudy_26_50);
+    printf("\"mit_cloudy_51_75\": %d, ", cloudy_51_75);
+    printf("\"mit_cloudy_76_100\": %d, ", cloudy_76_100);
     printf("\"_cloud_coverage\": %f", cloud_coverage); /* prefixed by an underscore means it's metadata, not a label */
     printf("}");
 }
@@ -195,306 +162,272 @@ void log_vitals()
     throw "not implemented";
 }
 
-void write_img_to_csv(std::string img_path, std::string csv_path)
+// void write_img_to_csv(uint8_t *img, int width, int height, int channels, std::string csv_path)
+// {
+//     std::ofstream stream(csv_path);
+//     Writer<delimiter<','>> writer(stream);
+
+//     /*std::vector<std::vector<std::string>> rows =
+//         {
+//             {"a", "b", "c"},
+//             {"1", "2", "3"},
+//             {"4", "5", "6"}
+//         };*/
+//     std::vector<std::vector<std::string>> rows;
+//     std::vector<std::string> headers;
+//     for (int i = 0; i < 3; i++)
+//     {
+//         for (int j = 0; j < 3; j++)
+//         {
+//             std::string red = "R";
+//             std::string blue = "B";
+//             std::string green = "G";
+//             std::string r_result, b_result, g_result;
+
+//             r_result = red + std::to_string(i) + std::to_string(j);
+//             g_result = green + std::to_string(i) + std::to_string(j);
+//             b_result = blue + std::to_string(i) + std::to_string(j);
+
+//             headers.push_back(r_result);
+//             headers.push_back(g_result);
+//             headers.push_back(b_result);
+//         }
+//     }
+//     headers.push_back("CLOUD");
+//     rows.push_back(headers);
+
+//     // Placeholder: center crop to 256 x 256
+//     int i_start = 0;    // std::max(0, (int)(ceil(width/2)-128));
+//     int j_start = 0;    // std::max(0, (int)(ceil(height/2)-128));
+//     int i_end = width;  // std::min(width, (int)(ceil(width/2)+128));
+//     int j_end = height; // std::min(height, (int)(ceil(height/2)+128));
+
+//     for (int i = i_start; i < i_end; i++)
+//     {
+//         for (int j = j_start; j < j_end; j++)
+//         {
+//             // memory offset from [0]
+//             // row major indexing
+//             std::vector<std::string> row;
+
+//             int offset = (channels) * ((width * j) + i);
+//             int r_22 = img[offset];
+//             int g_22 = img[offset + 1];
+//             int b_22 = img[offset + 2];
+//             // std::cout<<"R, G, B="<<r_22<<", "<<g_22<<", "<<b_22<<"\n";
+//             // std::cout<<"Offset "<<offset<<"\n";
+
+//             int jm = j - 1;
+//             int jp = j + 1;
+//             int im = i - 1;
+//             int ip = i + 1;
+//             if (i == 0)
+//             {
+//                 im = i;
+//             }
+//             if (i == width - 1)
+//             {
+//                 ip = i;
+//             }
+//             if (j == 0)
+//             {
+//                 jm = j;
+//             }
+//             if (j == height - 1)
+//             {
+//                 jp = j;
+//             }
+
+//             int offset_11 = (channels) * ((width * jm) + im);
+
+//             int r_11 = img[offset_11];
+//             int g_11 = img[offset_11 + 1];
+//             int b_11 = img[offset_11 + 2];
+
+//             row.push_back(std::to_string(r_11));
+//             row.push_back(std::to_string(g_11));
+//             row.push_back(std::to_string(b_11));
+
+//             int offset_12 = (channels) * ((width * j) + im);
+
+//             int r_12 = img[offset_12];
+//             int g_12 = img[offset_12 + 1];
+//             int b_12 = img[offset_12 + 2];
+
+//             row.push_back(std::to_string(r_12));
+//             row.push_back(std::to_string(g_12));
+//             row.push_back(std::to_string(b_12));
+
+//             int offset_13 = (channels) * ((width * jp) + im);
+
+//             int r_13 = img[offset_13];
+//             int g_13 = img[offset_13 + 1];
+//             int b_13 = img[offset_13 + 2];
+
+//             row.push_back(std::to_string(r_13));
+//             row.push_back(std::to_string(g_13));
+//             row.push_back(std::to_string(b_13));
+
+//             int offset_21 = (channels) * ((width * jm) + i);
+
+//             int r_21 = img[offset_21];
+//             int g_21 = img[offset_21 + 1];
+//             int b_21 = img[offset_21 + 2];
+
+//             row.push_back(std::to_string(r_21));
+//             row.push_back(std::to_string(g_21));
+//             row.push_back(std::to_string(b_21));
+
+//             row.push_back(std::to_string(r_22));
+//             row.push_back(std::to_string(g_22));
+//             row.push_back(std::to_string(b_22));
+
+//             int offset_23 = (channels) * ((width * jp) + i);
+
+//             int r_23 = img[offset_23];
+//             int g_23 = img[offset_23 + 1];
+//             int b_23 = img[offset_23 + 2];
+
+//             row.push_back(std::to_string(r_23));
+//             row.push_back(std::to_string(g_23));
+//             row.push_back(std::to_string(b_23));
+
+//             int offset_31 = (channels) * ((width * jm) + ip);
+
+//             int r_31 = img[offset_31];
+//             int g_31 = img[offset_31 + 1];
+//             int b_31 = img[offset_31 + 2];
+
+//             row.push_back(std::to_string(r_31));
+//             row.push_back(std::to_string(g_31));
+//             row.push_back(std::to_string(b_31));
+
+//             int offset_32 = (channels) * ((width * j) + ip);
+
+//             int r_32 = img[offset_32];
+//             int g_32 = img[offset_32 + 1];
+//             int b_32 = img[offset_32 + 2];
+
+//             row.push_back(std::to_string(r_32));
+//             row.push_back(std::to_string(g_32));
+//             row.push_back(std::to_string(b_32));
+
+//             int offset_33 = (channels) * ((width * jp) + ip);
+
+//             int r_33 = img[offset_33];
+//             int g_33 = img[offset_33 + 1];
+//             int b_33 = img[offset_33 + 2];
+
+//             row.push_back(std::to_string(r_33));
+//             row.push_back(std::to_string(g_33));
+//             row.push_back(std::to_string(b_33));
+
+//             row.push_back(std::to_string(1)); // placeholder for cloud status
+
+//             rows.push_back(row);
+//         }
+//     }
+
+//     writer.write_rows(rows);
+//     stream.close();
+// }
+
+// void write_csv_to_img(std::string csv_path, std::string img_path)
+// {
+//     csv2::Reader<delimiter<','>,
+//                  quote_character<'"'>,
+//                  first_row_is_header<true>,
+//                  trim_policy::trim_whitespace>
+//         csv;
+
+//     if (csv.mmap(csv_path))
+//     {
+//         const auto header = csv.header();
+//         for (const auto cell : header)
+//         {
+//             std::string val;
+//             cell.read_value(val);
+//             // std::cout<<val<<"\n";
+//         }
+//         // int height = 200;
+//         // int width = 200;
+//         int channels = 3; // R, G, B
+
+//         size_t nrows = csv.rows();
+//         // std::cout<<"nrows="<<nrows<<"\n";
+//         int img_memory = sizeof(uint8_t) * nrows * channels;
+//         // TODO: error check, if !img etc
+//         // printf("image loaded\n");
+//         // luminosity based implementation - let's loop through every pixel
+//         // first allocate an output image...
+//         uint8_t *cloud_mask_out = (uint8_t *)malloc(img_memory);
+//         // printf("%i\n bytes allocated", img_memory);
+
+//         int csv_row = 0;
+//         for (const auto row : csv)
+//         {
+//             for (const auto cell : row)
+//             {
+//                 // Read cell value
+//                 std::string val;
+//                 cell.read_value(val);
+//                 if (csv_row >= 2)
+//                 {
+//                     // int offset = (channels) * ((width * j) + i);
+//                     // int r_px = img[offset];
+//                     // int g_px = img[offset + 1];
+//                     // int b_px = img[offset + 2];
+
+//                     int idx = channels * (csv_row - 2);
+//                     // std::cout<<"idx, val, ht="<<idx<<", "<<idx<<", "<<csv_row<<"\n";
+
+//                     if (val == "1")
+//                     {
+//                         cloud_mask_out[idx] = 255;
+//                         cloud_mask_out[idx + 1] = 255;
+//                         cloud_mask_out[idx + 2] = 255;
+//                     }
+//                     else
+//                     {
+//                         cloud_mask_out[idx] = 0;
+//                         cloud_mask_out[idx + 1] = 0;
+//                         cloud_mask_out[idx + 2] = 0;
+//                     }
+//                 }
+//             }
+//             csv_row++;
+//         }
+//         // Assume square.
+//         int width = (int)(pow(nrows, 0.5));
+//         int height = (int)(pow(nrows, 0.5));
+//         // printf("writing image...\n");
+//         const char *img_outpath = img_path.c_str();
+//         stbi_write_png(img_outpath, width, height, channels, cloud_mask_out, width * channels);
+
+//         // remember to free the image at the very end
+//         stbi_image_free(cloud_mask_out);
+//     }
+// }
+
+void white_balance(uint8_t *img, int width, int height, int channels)
 {
-  int width, height, channels;
-  // use 0 to have stb figure out components per pixel
-  uint8_t *img = stbi_load(img_path.c_str(), &width, &height, &channels, 0);
-
-  if (img == NULL)
-  {
-      printf("error loading image, reason: %s\n", stbi_failure_reason());
-      exit(1);
-  }
-
-  //printf("loaded image of size w, h, c, %i %i %i\n", width, height, channels);
-  // size of image in memory
-  int img_memory = sizeof(uint8_t) * width * height * channels;
-
-  // TODO: error check, if !img etc
-  // printf("image loaded\n");
-  // luminosity based implementation - let's loop through every pixel
-  // first allocate an output image...
-  uint8_t *luminosity_out = (uint8_t *)malloc(img_memory);
-  //printf("%i\n bytes allocated", img_memory);
-  // TODO: implement write mode checking :)
-  // loop over the image...
-  for (int i = 0; i < width; i++)
-  {
-      for (int j = 0; j < height; j++)
-      {
-          // memory offset from [0]
-          // row major indexing
-          int offset = (channels) * ((width * j) + i);
-          int r_px = img[offset];
-          int g_px = img[offset + 1];
-          int b_px = img[offset + 2];
-          //std::cout<<"R, G, B="<<r_px<<", "<<g_px<<", "<<b_px<<"\n";
-
-          if (r_px >= R_THRESH || g_px >= G_THRESH || b_px >= B_THRESH)
-          {
-              luminosity_out[offset] = 255;
-              luminosity_out[offset + 1] = 255;
-              luminosity_out[offset + 2] = 255;
-          }
-          else
-          {
-              luminosity_out[offset] = 0;
-              luminosity_out[offset + 1] = 0;
-              luminosity_out[offset + 2] = 0;
-          }
-      }
-  }
-
-
-
-  std::ofstream stream(csv_path);
-    Writer<delimiter<','>> writer(stream);
-
-    /*std::vector<std::vector<std::string>> rows =
-        {
-            {"a", "b", "c"},
-            {"1", "2", "3"},
-            {"4", "5", "6"}
-        };*/
-    std::vector<std::vector<std::string>> rows;
-    std::vector<std::string> headers;
-    for(int i = 0; i < 3; i++)
+    for (int i = 0; i < width; i++)
     {
-      for (int j = 0; j < 3; j++)
-      {
-        std::string red = "R";
-        std::string blue = "B";
-        std::string green = "G";
-        std::string r_result, b_result, g_result;
-
-        r_result = red + std::to_string(i) +std::to_string(j);
-        g_result = green + std::to_string(i) +std::to_string(j);
-        b_result = blue + std::to_string(i) +std::to_string(j);
-
-        headers.push_back(r_result);
-        headers.push_back(g_result);
-        headers.push_back(b_result);
-      }
-    }
-    headers.push_back("CLOUD");
-    rows.push_back(headers);
-
-    //Placeholder: center crop to 256 x 256
-    int i_start = 0;//std::max(0, (int)(ceil(width/2)-128));
-    int j_start = 0;//std::max(0, (int)(ceil(height/2)-128));
-    int i_end = width;//std::min(width, (int)(ceil(width/2)+128));
-    int j_end = height;//std::min(height, (int)(ceil(height/2)+128));
-
-    for (int i = i_start; i < i_end; i++)
-    {
-        for (int j = j_start; j < j_end; j++)
+        for (int j = 0; j < height; j++)
         {
             // memory offset from [0]
             // row major indexing
-            std::vector<std::string> row;
-
             int offset = (channels) * ((width * j) + i);
-            int r_22 = img[offset];
-            int g_22 = img[offset + 1];
-            int b_22 = img[offset + 2];
-            //std::cout<<"R, G, B="<<r_22<<", "<<g_22<<", "<<b_22<<"\n";
-            //std::cout<<"Offset "<<offset<<"\n";
+            int r_px = img[offset];
+            int g_px = img[offset + 1];
+            int b_px = img[offset + 2];
 
-            int jm = j-1;
-            int jp = j+1;
-            int im = i-1;
-            int ip = i+1;
-            if(i==0)
-            {
-              im = i;
-            }
-            if(i==width-1)
-            {
-              ip = i;
-            }
-            if(j==0)
-            {
-              jm = j;
-            }
-            if(j==height-1)
-            {
-              jp = j;
-            }
-
-            int offset_11 = (channels) * ((width * jm) + im);
-
-            int r_11 = img[offset_11];
-            int g_11 = img[offset_11 + 1];
-            int b_11 = img[offset_11 + 2];
-
-            row.push_back(std::to_string(r_11));
-            row.push_back(std::to_string(g_11));
-            row.push_back(std::to_string(b_11));
-
-
-            int offset_12 = (channels) * ((width * j) + im);
-
-            int r_12 = img[offset_12];
-            int g_12 = img[offset_12 + 1];
-            int b_12 = img[offset_12 + 2];
-
-            row.push_back(std::to_string(r_12));
-            row.push_back(std::to_string(g_12));
-            row.push_back(std::to_string(b_12));
-
-            int offset_13 = (channels) * ((width * jp) + im);
-
-            int r_13 = img[offset_13];
-            int g_13 = img[offset_13 + 1];
-            int b_13 = img[offset_13 + 2];
-
-            row.push_back(std::to_string(r_13));
-            row.push_back(std::to_string(g_13));
-            row.push_back(std::to_string(b_13));
-
-            int offset_21 = (channels) * ((width * jm) +i);
-
-            int r_21 = img[offset_21];
-            int g_21 = img[offset_21 + 1];
-            int b_21 = img[offset_21 + 2];
-
-            row.push_back(std::to_string(r_21));
-            row.push_back(std::to_string(g_21));
-            row.push_back(std::to_string(b_21));
-
-            row.push_back(std::to_string(r_22));
-            row.push_back(std::to_string(g_22));
-            row.push_back(std::to_string(b_22));
-
-            int offset_23 = (channels) * ((width * jp) + i);
-
-            int r_23 = img[offset_23];
-            int g_23 = img[offset_23 + 1];
-            int b_23 = img[offset_23 + 2];
-
-            row.push_back(std::to_string(r_23));
-            row.push_back(std::to_string(g_23));
-            row.push_back(std::to_string(b_23));
-
-            int offset_31 = (channels) * ((width * jm) + ip);
-
-            int r_31 = img[offset_31];
-            int g_31 = img[offset_31 + 1];
-            int b_31 = img[offset_31 + 2];
-
-            row.push_back(std::to_string(r_31));
-            row.push_back(std::to_string(g_31));
-            row.push_back(std::to_string(b_31));
-
-            int offset_32 = (channels) * ((width * j) + ip);
-
-            int r_32 = img[offset_32];
-            int g_32 = img[offset_32 + 1];
-            int b_32 = img[offset_32 + 2];
-
-            row.push_back(std::to_string(r_32));
-            row.push_back(std::to_string(g_32));
-            row.push_back(std::to_string(b_32));
-
-            int offset_33 = (channels) * ((width * jp) + ip);
-
-            int r_33 = img[offset_33];
-            int g_33 = img[offset_33 + 1];
-            int b_33 = img[offset_33 + 2];
-
-            row.push_back(std::to_string(r_33));
-            row.push_back(std::to_string(g_33));
-            row.push_back(std::to_string(b_33));
-
-            row.push_back(std::to_string(1)); //placeholder for cloud status
-
-            rows.push_back(row);
-
+            r_px = R_LUT[r_px];
+            g_px = G_LUT[r_px];
+            b_px = B_LUT[r_px];
         }
     }
-
-    writer.write_rows(rows);
-    stream.close();
-
-    //printf("writing image...\n");
-    //stbi_write_png("yee.png", width, height, channels, luminosity_out, width * channels);
-
-    // remember to free the image at the very end
-    stbi_image_free(img);
-    stbi_image_free(luminosity_out);
 }
-
-void write_csv_to_img(std::string csv_path, std::string img_path)
-{
-  csv2::Reader<delimiter<','>,
-               quote_character<'"'>,
-               first_row_is_header<true>,
-               trim_policy::trim_whitespace> csv;
-
-  if (csv.mmap(csv_path)) {
-    const auto header = csv.header();
-    for( const auto cell: header) {
-      std::string val;
-      cell.read_value(val);
-      //std::cout<<val<<"\n";
-    }
-    //int height = 200;
-    //int width = 200;
-    int channels = 3; //R, G, B
-
-    size_t nrows = csv.rows();
-    //std::cout<<"nrows="<<nrows<<"\n";
-    int img_memory = sizeof(uint8_t) * nrows * channels;
-    // TODO: error check, if !img etc
-    // printf("image loaded\n");
-    // luminosity based implementation - let's loop through every pixel
-    // first allocate an output image...
-    uint8_t *cloud_mask_out = (uint8_t *)malloc(img_memory);
-    //printf("%i\n bytes allocated", img_memory);
-
-    int csv_row= 0;
-    for (const auto row: csv) {
-      for (const auto cell: row) {
-        //Read cell value
-        std::string val;
-        cell.read_value(val);
-        if (csv_row >= 2) {
-          //int offset = (channels) * ((width * j) + i);
-          //int r_px = img[offset];
-          //int g_px = img[offset + 1];
-          //int b_px = img[offset + 2];
-
-          int idx = channels*(csv_row-2);
-          //std::cout<<"idx, val, ht="<<idx<<", "<<idx<<", "<<csv_row<<"\n";
-
-          if (val == "1")
-          {
-            cloud_mask_out[idx] = 255;
-            cloud_mask_out[idx+1] = 255;
-            cloud_mask_out[idx+2] = 255;
-          } else
-          {
-            cloud_mask_out[idx] = 0;
-            cloud_mask_out[idx+1] = 0;
-            cloud_mask_out[idx+2] = 0;
-          }
-        }
-      }
-      csv_row++;
-    }
-    //Assume square.
-    int width = (int)(pow(nrows, 0.5));
-    int height = (int)(pow(nrows, 0.5));
-    //printf("writing image...\n");
-    const char* img_outpath = img_path.c_str();
-    stbi_write_png(img_outpath, width, height, channels, cloud_mask_out, width * channels);
-
-    // remember to free the image at the very end
-    stbi_image_free(cloud_mask_out);
-  }
-}
-
 
 int main(int argc, char **argv)
 {
@@ -502,7 +435,6 @@ int main(int argc, char **argv)
     // 0 - do not write new img
     // 1 - write new image
     // 2 - overwrite original image
-    // 3 - overwrite but back up original
     string img_path;
     parse_options(argc, argv, &img_path, &write_mode);
 
@@ -511,13 +443,21 @@ int main(int argc, char **argv)
     int width, height, channels;
 
     // use 0 to have stb figure out components per pixel
-    uint8_t *img = stbi_load(img_path.c_str(), &width, &height, &channels, 0);
+    // TODO: check if img path is empty first
+    uint8_t *img;
+
+    // if (!img_path.empty())
+    // {
+    img = stbi_load(img_path.c_str(), &width, &height, &channels, 0);
+    // }
 
     if (img == nullptr)
     {
         printf("error loading image, reason: %s\n", stbi_failure_reason());
         exit(1);
     }
+
+    white_balance(img, width, height, channels);
 
 #ifdef DEBUG
     printf("loaded image of size w, h, c, %i %i %i\n", width, height, channels);
@@ -577,17 +517,17 @@ int main(int argc, char **argv)
     stbi_write_png(build_image_output_filename(write_mode, img_path, ".png", "lum").c_str(), width, height, channels, out_buffer, width * channels);
     stbi_image_free(out_buffer);
 
-    //RANGER STUFF HERE
-    //img -> csv
-    write_img_to_csv(img_path, INPUT_CSV_FILENAME);
-    //train
-    system("./include/ranger/cpp_version/ranger --file ranger_input.csv --depvarname CLOUD --treetype 1 --ntree 10 --write");
-    //test
-    system("./include/ranger/cpp_version/ranger --file ranger_input.csv --predict ranger_out.forest");
-    system("mv ranger_out.prediction ranger_out.csv");
-    //write img
-    std::string rf_outpath = build_image_output_filename(write_mode, img_path, ".png", "rf").c_str();
-    write_csv_to_img("ranger_out.csv", rf_outpath);
+    // RANGER STUFF HERE
+    // img -> csv
+    // write_img_to_csv(img, width, height, channels, INPUT_CSV_FILENAME);
+    // // train
+    // system("./include/ranger/cpp_version/ranger --file ranger_input.csv --depvarname CLOUD --treetype 1 --ntree 10 --write");
+    // // test
+    // system("./include/ranger/cpp_version/ranger --file ranger_input.csv --predict ranger_out.forest");
+    // system("mv ranger_out.prediction ranger_out.csv");
+    // // write img
+    // std::string rf_outpath = build_image_output_filename(write_mode, img_path, ".png", "rf");
+    // write_csv_to_img("ranger_out.csv", rf_outpath);
 
     // TFLITE STUFF here
     // Load model

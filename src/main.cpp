@@ -23,8 +23,8 @@
 #include <vector>
 #include <iterator>
 
-#define INPUT_CSV_FILENAME "ranger_input.csv"
-#define OUTPUT_CSV_FILENAME "ranger_output.csv"
+// #define INPUT_CSV_FILENAME "ranger_input.csv"
+// #define OUTPUT_CSV_FILENAME "ranger_output.csv"
 
 // using namespace csv2;
 
@@ -54,11 +54,12 @@ using std::string;
 // proper debugging print statements
 // implement proper filenames
 
-int parse_options(int argc, char **argv, string *img_write_path, int *img_write_mode)
+int parse_options(int argc, char **argv, string *img_write_path, int *img_write_mode, string *model_path)
 {
     /* get provider host and port from command arguments */
     int8_t argv_index_input = -1;
     int8_t argv_index_write = -1;
+    int8_t argv_index_model = -1;
 
     // --------------------------------------------------------------------------
     // parse the command arguments
@@ -73,8 +74,8 @@ int parse_options(int argc, char **argv, string *img_write_path, int *img_write_
             printf("\n  --write    / -w       the write mode of the output image (optional)"
                    "\n\t0 - do not write a new image (equivalent to not specifying the --write option)"
                    "\n\t1 - write a new image as a new file"
-                   "\n\t2 - write a new image that overwrites the input image file"
-                   "\n\t3 - same as option 2 but backs up the original input image");
+                   "\n\t2 - write a new image that overwrites the input image file");
+            printf("\n  --model    / -m       location of tflite model");
             printf("\n  --help     / -?       this information\n");
 
             /* program error exit code */
@@ -85,6 +86,8 @@ int parse_options(int argc, char **argv, string *img_write_path, int *img_write_
             argv_index_input = ++argn;
         else if (streq(argv[argn], "--write") || streq(argv[argn], "-w"))
             argv_index_write = ++argn;
+        else if (streq(argv[argn], "--model") || streq(argv[argn], "-m"))
+            argv_index_model = ++argn;
         else
         {
             /* print error message */
@@ -131,6 +134,19 @@ int parse_options(int argc, char **argv, string *img_write_path, int *img_write_
 
         // set to write mode
         *img_write_mode = write_mode;
+    }
+
+    // parse the output image write mode option, if given
+    if (argv_index_write == -1)
+    {
+        /* printf for documentation purposes only */
+#ifdef DEBUG
+        printf("no model given\n");
+#endif
+    }
+    else
+    {
+        *model_path = string(argv[argv_index_model]);
     }
 
     return 0;
@@ -418,13 +434,11 @@ void white_balance(uint8_t *img, int width, int height, int channels)
             // memory offset from [0]
             // row major indexing
             int offset = (channels) * ((width * j) + i);
-            int r_px = img[offset];
-            int g_px = img[offset + 1];
-            int b_px = img[offset + 2];
 
-            r_px = R_LUT[r_px];
-            g_px = G_LUT[r_px];
-            b_px = B_LUT[r_px];
+            img[offset] = R_LUT[img[offset]];
+            img[offset + 1] = G_LUT[img[offset + 1]];
+            img[offset + 2] =  B_LUT[img[offset + 2]];
+
         }
     }
 }
@@ -436,7 +450,8 @@ int main(int argc, char **argv)
     // 1 - write new image
     // 2 - overwrite original image
     string img_path;
-    parse_options(argc, argv, &img_path, &write_mode);
+    string model_path;
+    parse_options(argc, argv, &img_path, &write_mode, &model_path);
 
     // try loading an image
     // height, width, number of components
@@ -458,6 +473,9 @@ int main(int argc, char **argv)
     }
 
     white_balance(img, width, height, channels);
+
+    stbi_write_png(build_image_output_filename(write_mode, img_path, ".png", "wb").c_str(), width, height, channels, img, width * channels);
+
 
 #ifdef DEBUG
     printf("loaded image of size w, h, c, %i %i %i\n", width, height, channels);
@@ -517,23 +535,11 @@ int main(int argc, char **argv)
     stbi_write_png(build_image_output_filename(write_mode, img_path, ".png", "lum").c_str(), width, height, channels, out_buffer, width * channels);
     stbi_image_free(out_buffer);
 
-    // RANGER STUFF HERE
-    // img -> csv
-    // write_img_to_csv(img, width, height, channels, INPUT_CSV_FILENAME);
-    // // train
-    // system("./include/ranger/cpp_version/ranger --file ranger_input.csv --depvarname CLOUD --treetype 1 --ntree 10 --write");
-    // // test
-    // system("./include/ranger/cpp_version/ranger --file ranger_input.csv --predict ranger_out.forest");
-    // system("mv ranger_out.prediction ranger_out.csv");
-    // // write img
-    // std::string rf_outpath = build_image_output_filename(write_mode, img_path, ".png", "rf");
-    // write_csv_to_img("ranger_out.csv", rf_outpath);
-
     // TFLITE STUFF here
     // Load model
     std::unique_ptr<tflite::FlatBufferModel>
         model =
-            tflite::FlatBufferModel::BuildFromFile(MODELPATH);
+            tflite::FlatBufferModel::BuildFromFile(model_path.c_str());
 
     MINIMAL_CHECK(model != nullptr);
 

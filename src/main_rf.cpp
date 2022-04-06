@@ -244,10 +244,10 @@ void write_img_to_csv(std::string img_path, std::string csv_path)
     rows.push_back(headers);
 
     //Placeholder: center crop to 256 x 256
-    int i_start = std::max(0, (int)(ceil(width/2)-128));
-    int j_start = std::max(0, (int)(ceil(height/2)-128));
-    int i_end = std::min(width, (int)(ceil(width/2)+128));
-    int j_end = std::min(height, (int)(ceil(height/2)+128));
+    int i_start = 0;//std::max(0, (int)(ceil(width/2)-128));
+    int j_start = 0;//std::max(0, (int)(ceil(height/2)-128));
+    int i_end = width;//std::min(width, (int)(ceil(width/2)+128));
+    int j_end = height;//std::min(height, (int)(ceil(height/2)+128));
 
     for (int i = i_start; i < i_end; i++)
     {

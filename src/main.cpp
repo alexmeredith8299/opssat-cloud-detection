@@ -14,9 +14,9 @@
 #include "stb_image_write.h"
 
 // tensorflow headers
-// #include "tensorflow/lite/interpreter.h"
-// #include "tensorflow/lite/kernels/register.h"
-// #include "tensorflow/lite/model.h"
+#include "tensorflow/lite/interpreter.h"
+#include "tensorflow/lite/kernels/register.h"
+#include "tensorflow/lite/model.h"
 
 // #include <csv2/reader.hpp> // include csv2 for random forest
 // #include <csv2/writer.hpp>
@@ -54,12 +54,15 @@ using std::string;
 // proper debugging print statements
 // implement proper filenames
 
-int parse_options(int argc, char **argv, string *img_write_path, int *img_write_mode, string *model_path)
+int parse_options(int argc, char **argv, string *img_write_path, int *img_write_mode,
+    string *model_path, string *ranger_binary_path, string *ranger_model_path)
 {
     /* get provider host and port from command arguments */
     int8_t argv_index_input = -1;
     int8_t argv_index_write = -1;
     int8_t argv_index_model = -1;
+    int8_t argv_index_ranger_binary = -1;
+    int8_t argv_index_ranger_model = -1;
 
     // --------------------------------------------------------------------------
     // parse the command arguments
@@ -76,6 +79,8 @@ int parse_options(int argc, char **argv, string *img_write_path, int *img_write_
                    "\n\t1 - write a new image as a new file"
                    "\n\t2 - write a new image that overwrites the input image file");
             printf("\n  --model    / -m       location of tflite model");
+            printf("\n  --ranger   / -r       location of ranger binary");
+            printf("\n  --forest   / -f     location of ranger random forest model");
             printf("\n  --help     / -?       this information\n");
 
             /* program error exit code */
@@ -88,6 +93,10 @@ int parse_options(int argc, char **argv, string *img_write_path, int *img_write_
             argv_index_write = ++argn;
         else if (streq(argv[argn], "--model") || streq(argv[argn], "-m"))
             argv_index_model = ++argn;
+        else if (streq(argv[argn], "--ranger") || streq(argv[argn], "-r"))
+            argv_index_ranger_binary = ++argn;
+        else if (streq(argv[argn], "--forest") || streq(argv[argn], "-f"))
+            argv_index_ranger_model = ++argn;
         else
         {
             /* print error message */
@@ -136,8 +145,8 @@ int parse_options(int argc, char **argv, string *img_write_path, int *img_write_
         *img_write_mode = write_mode;
     }
 
-    // parse the output image write mode option, if given
-    if (argv_index_write == -1)
+    // parse the tflite model path option, if given
+    if (argv_index_model == -1)
     {
         /* printf for documentation purposes only */
 #ifdef DEBUG
@@ -147,6 +156,32 @@ int parse_options(int argc, char **argv, string *img_write_path, int *img_write_
     else
     {
         *model_path = string(argv[argv_index_model]);
+    }
+
+    // parse the ranger binary path option, if given
+    if (argv_index_ranger_binary == -1)
+    {
+        /* printf for documentation purposes only */
+    #ifdef DEBUG
+        printf("no ranger binary given\n");
+    #endif
+    }
+    else
+    {
+        *ranger_binary_path = string(argv[argv_index_ranger_binary]);
+    }
+
+    // parse the ranger model path option, if given
+    if (argv_index_ranger_model == -1)
+    {
+        /* printf for documentation purposes only */
+    #ifdef DEBUG
+        printf("no ranger model given\n");
+    #endif
+    }
+    else
+    {
+        *ranger_model_path = string(argv[argv_index_ranger_model]);
     }
 
     return 0;
@@ -340,7 +375,9 @@ int main(int argc, char **argv)
     // 2 - overwrite original image
     string img_path;
     string model_path;
-    parse_options(argc, argv, &img_path, &write_mode, &model_path);
+    string ranger_binary_path;
+    string ranger_model_path;
+    parse_options(argc, argv, &img_path, &write_mode, &model_path, &ranger_binary_path, &ranger_model_path);
 
     // try loading an image
     // height, width, number of components
@@ -362,6 +399,10 @@ int main(int argc, char **argv)
     }
 
     white_balance(img, width, height, channels);
+#ifdef DEBUG
+    printf("writing white balanced input image to temp.png");
+#endif
+    stbi_write_png("temp.png", width, height, channels, img, width * channels);
 
 #ifdef DEBUG
     printf("loaded image of size w, h, c, %i %i %i\n", width, height, channels);
@@ -420,6 +461,20 @@ int main(int argc, char **argv)
     // todo: make it build a filename, lol
     stbi_write_png(build_image_output_filename(write_mode, img_path, ".png", "lum").c_str(), width, height, channels, out_buffer, width * channels);
     stbi_image_free(out_buffer);
+
+    //Ranger stuff here
+    string ranger_cmd = ranger_binary_path + " --file temp.png --predict " + ranger_model_path + " --writetoimg";
+#ifdef DEBUG
+    printf("calling ranger...\n");
+#endif
+    string ranger_out_fname = build_image_output_filename(write_mode, img_path, ".png", "rf").c_str();
+    string ranger_rename_cmd = "mv ranger_out.png " + ranger_out_fname;
+    system(ranger_cmd.c_str());
+#ifdef DEBUG
+    printf("renaming ranger image output and removing temp.png ...\n");
+#endif
+    system(ranger_rename_cmd.c_str());
+    system("rm -rf temp.png");
 
     // TFLITE STUFF here
     // Load model

@@ -14,9 +14,9 @@
 #include "stb_image_write.h"
 
 // tensorflow headers
-// #include "tensorflow/lite/interpreter.h"
-// #include "tensorflow/lite/kernels/register.h"
-// #include "tensorflow/lite/model.h"
+#include "tensorflow/lite/interpreter.h"
+#include "tensorflow/lite/kernels/register.h"
+#include "tensorflow/lite/model.h"
 
 // #include <csv2/reader.hpp> // include csv2 for random forest
 // #include <csv2/writer.hpp>

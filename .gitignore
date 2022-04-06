@@ -43,7 +43,6 @@
 
 /em_test
 /.vscode
-/release
 /bin
 /tensorflow-lite
 /tmp

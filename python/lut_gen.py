@@ -3,9 +3,9 @@ import matplotlib.pyplot as plt
 
 MAX_VAL = 255
 
-R_BOUNDS = (0.0431 * MAX_VAL, 0.7231 * MAX_VAL)
-G_BOUNDS = (0.0471 * MAX_VAL, 0.9960 * MAX_VAL)
-B_BOUNDS = (0.0471 * MAX_VAL, 0.9960 * MAX_VAL)
+R_BOUNDS = (30, 82)
+G_BOUNDS = (54, 143)
+B_BOUNDS = (57 , 140)
 
 r_vals = np.arange(0, MAX_VAL)
 g_vals = np.arange(0, MAX_VAL)

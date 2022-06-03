@@ -1,0 +1,18 @@
+Starting Ranger.
+Loading input file: temp.png.
+Loading forest from file bin/ranger_out.forest.
+Predicting ..
+
+Tree type:                         Probability estimation
+Dependent variable name:           CLOUD
+Number of trees:                   10
+Sample size:                       357962
+Number of independent variables:   27
+Mtry:                              5
+Target node size:                  10
+Variable importance mode:          0
+Memory mode:                       0
+Seed:                              0
+Number of threads:                 4
+
+Finished Ranger.

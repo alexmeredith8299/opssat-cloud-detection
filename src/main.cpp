@@ -1,4 +1,4 @@
-// #define DEBUG
+#define DEBUG
 
 #include <stdio.h>
 #include <iostream>
@@ -463,7 +463,7 @@ int main(int argc, char **argv)
     stbi_image_free(out_buffer);
 
     //Ranger stuff here
-    string ranger_cmd = ranger_binary_path + " --file temp.png --predict " + ranger_model_path + " --writetoimg";
+    string ranger_cmd = ranger_binary_path + " --file temp.png --predict " + ranger_model_path + " --writetoimg --verbose";
 #ifdef DEBUG
     printf("calling ranger...\n");
 #endif

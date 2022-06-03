@@ -1,0 +1,12 @@
+# This is a generated file and its contents are an internal implementation detail.
+# The download step will be re-executed if anything in this file changes.
+# No other meaning or use of this file is supported.
+
+method=url
+command=/usr/bin/cmake;-P;/home/alex/opssat-cloud-detection/bin-sepp/pthreadpool-download/pthreadpool-prefix/src/pthreadpool-stamp/download-pthreadpool.cmake;COMMAND;/usr/bin/cmake;-P;/home/alex/opssat-cloud-detection/bin-sepp/pthreadpool-download/pthreadpool-prefix/src/pthreadpool-stamp/verify-pthreadpool.cmake;COMMAND;/usr/bin/cmake;-P;/home/alex/opssat-cloud-detection/bin-sepp/pthreadpool-download/pthreadpool-prefix/src/pthreadpool-stamp/extract-pthreadpool.cmake
+source_dir=/home/alex/opssat-cloud-detection/bin-sepp/pthreadpool-source
+work_dir=/home/alex/opssat-cloud-detection/bin-sepp
+url(s)=https://github.com/Maratyszcza/pthreadpool/archive/545ebe9f225aec6dca49109516fac02e973a3de2.zip
+hash=SHA256=8461f6540ae9f777ce20d1c0d1d249e5e61c438744fb390c0c6f91940aa69ea3
+no_extract=
+
